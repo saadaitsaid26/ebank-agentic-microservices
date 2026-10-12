@@ -2,6 +2,7 @@ package net.saad.ebankservice.services;
 
 import net.saad.ebankservice.entities.BankAccount;
 import net.saad.ebankservice.feign.CustomerRestClient;
+import net.saad.ebankservice.model.Customer;
 import net.saad.ebankservice.repository.BankAccountRepository;
 import org.springframework.stereotype.Service;
 
@@ -43,8 +44,14 @@ public class EBankService {
     }
 
     public BankAccount save(BankAccount bankAccount){
-        bankAccount.setId(UUID.randomUUID().toString());
-        bankAccount.setCreatedAt(new Date());
-        return bankAccountRepository.save(bankAccount);
+        try {
+            Customer customer = customerRestClient.getCustomerById(bankAccount.getCustomerId());
+            bankAccount.setId(UUID.randomUUID().toString());
+            bankAccount.setCreatedAt(new Date());
+            return bankAccountRepository.save(bankAccount);
+        }catch(Exception e){
+            throw new RuntimeException(e.getMessage());
+        }
+
     }
 }
