@@ -22,7 +22,7 @@ public class EbankServiceApplication {
                   eBankService.save(BankAccount.builder()
                           .type(Math.random()>0.5 ? "CurrentAccount" : "SavingAccount")
                           .balance(1000 + Math.random()*60000)
-                          .customerId(i)
+                          .customerId(Long.valueOf(i))
                           .build());
               }
           }
