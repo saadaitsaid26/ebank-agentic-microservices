@@ -1,6 +1,7 @@
 package net.saad.ebankservice.services;
 
 import net.saad.ebankservice.entities.BankAccount;
+import net.saad.ebankservice.feign.CustomerRestClient;
 import net.saad.ebankservice.repository.BankAccountRepository;
 import org.springframework.stereotype.Service;
 
@@ -11,18 +12,34 @@ import java.util.UUID;
 @Service
 public class EBankService {
     private BankAccountRepository bankAccountRepository;
+    private CustomerRestClient customerRestClient;
 
-    EBankService(BankAccountRepository bankAccountRepository){
+    EBankService(BankAccountRepository bankAccountRepository, CustomerRestClient customerRestClient){
+
         this.bankAccountRepository=bankAccountRepository;
+        this.customerRestClient=customerRestClient;
     }
 
-    public List<BankAccount> getAllBankAccounts(){
-        return bankAccountRepository.findAll();
+
+    public List<BankAccount> getAllBankAccounts() {
+        List<BankAccount> accounts = bankAccountRepository.findAll();
+
+        accounts.forEach(account -> {
+            account.setCustomer(
+                    customerRestClient.getCustomerById(account.getCustomerId())
+            );
+        });
+
+        return accounts;
     }
+
 
     public BankAccount getBankAccountById(String id){
-        return bankAccountRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("Bank NOt found"));
+        BankAccount bankAccount= bankAccountRepository.findById(id)
+                .orElseThrow(()-> new RuntimeException("Bank Account Not found"));
+        bankAccount.setCustomer(
+                customerRestClient.getCustomerById(bankAccount.getCustomerId()));
+        return bankAccount;
     }
 
     public BankAccount save(BankAccount bankAccount){
