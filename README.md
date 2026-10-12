@@ -11,7 +11,6 @@ Les endpoints des deux services ont été testés.
 
 
 
-
 ### 2. Documentation avec Swagger UI
 
 Swagger UI permet de consulter les endpoints disponibles et de tester les API REST directement depuis le navigateur.
