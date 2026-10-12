@@ -28,7 +28,9 @@ La configuration comprend des routes statiques et dynamiques pour acheminer les 
 Configuration statique
 
 
+
 Configuration dynamique
+
 
 ### 4. Communication avec OpenFeign
 
