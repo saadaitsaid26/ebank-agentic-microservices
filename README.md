@@ -43,3 +43,6 @@ Lorsque Customer-Service devient indisponible, le Circuit Breaker peut interromp
 
 
 ## Partie 2 : Mise en place de l'agent AI
+
+### 1. Documentation swagger
+
