@@ -42,4 +42,4 @@ Resilience4j permet de mettre en place le pattern Circuit Breaker pour gérer le
 Lorsque Customer-Service devient indisponible, le Circuit Breaker peut interrompre temporairement les appels afin d'éviter de répéter les requêtes vers un service en panne, selon la configuration définie.
 
 
-
+## Partie 2 : Mise en place de l'agent AI
