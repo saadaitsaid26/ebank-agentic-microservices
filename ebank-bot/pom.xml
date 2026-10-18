@@ -80,6 +80,23 @@
             <artifactId>spring-ai-starter-mcp-client</artifactId>
         </dependency>
 
+        <!-- Telegram Bot Starter -->
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots-springboot-longpolling-starter</artifactId>
+            <version>7.10.0</version>
+        </dependency>
+
+        <!-- Discord Bot Starter -->
+        <dependency>
+            <groupId>com.zgamelogic</groupId>
+            <artifactId>spring-boot-starter-discord</artifactId>
+            <version>5.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.netflix.eureka</groupId>
+            <artifactId>eureka-client-jersey3</artifactId>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>

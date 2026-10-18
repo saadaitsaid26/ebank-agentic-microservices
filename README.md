@@ -51,3 +51,7 @@ Lorsque Customer-Service devient indisponible, le Circuit Breaker peut interromp
 Avec Customer service
 
 Avec Ebank Service
+
+Creation d'un serveur discord 
+
+Le Bot discord
