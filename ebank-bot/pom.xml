@@ -83,10 +83,9 @@
         <!-- Telegram Bot Starter -->
         <dependency>
             <groupId>org.telegram</groupId>
-            <artifactId>telegrambots-springboot-longpolling-starter</artifactId>
-            <version>7.10.0</version>
+            <artifactId>telegrambots-spring-boot-starter</artifactId>
+            <version>6.9.7.1</version>
         </dependency>
-
         <!-- Discord Bot Starter -->
         <dependency>
             <groupId>com.zgamelogic</groupId>

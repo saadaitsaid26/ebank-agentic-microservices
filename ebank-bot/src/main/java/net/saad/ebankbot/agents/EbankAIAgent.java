@@ -3,6 +3,7 @@ package net.saad.ebankbot.agents;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +35,14 @@ public class EbankAIAgent {
                 .user(query)
                 .advisors(advisor -> advisor.param(
                         ChatMemory.CONVERSATION_ID, conversationId))
+                .call()
+                .content();
+    }
+
+    // Nouvelle méthode à ajouter pour les objets Prompt (texte + images)
+    public String chat(Prompt prompt, String conversationId) {
+        return chatClient.prompt(prompt)
+                .advisors(advisor -> advisor.param(ChatMemory.CONVERSATION_ID, conversationId))
                 .call()
                 .content();
     }
