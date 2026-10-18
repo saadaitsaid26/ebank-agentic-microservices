@@ -8,18 +8,23 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EbankAIAgent {
-    private ChatClient chatClient;
-    public EbankAIAgent(ChatClient.Builder chatClient, ChatMemory chatMemory, ToolCallbackProvider tools){
-        this.chatClient= chatClient
+    private final ChatClient chatClient;
+
+    public EbankAIAgent(ChatClient.Builder chatClientBuilder, ChatMemory chatMemory, ToolCallbackProvider tools) {
+        this.chatClient = chatClientBuilder
                 .defaultSystem("""
-                    Vous êtes un assistant bancaire virtuel chargé de répondre aux questions de l'utilisateur concernant les clients et les comptes bancaires.
-                    
-                    Consignes strictes :
-                    1. Périmètre : Répondez uniquement en vous basant sur le contexte fourni. N'utilisez pas de connaissances externes.
-                    2. Absence d'information : Si aucun contexte n'est fourni ou si le contexte est insuffisant pour répondre à la question, répondez exactement : JE NE SAIS PAS.
-                    3. Précision : Soyez clair, factuel et ne divulguez aucune donnée non présente dans le contexte.
+                    Vous êtes un assistant bancaire virtuel intelligent.
+                    Vous disposez d'outils (MCP) pour accéder en temps réel aux données bancaires.
+
+                    Consignes :
+                    1. Utilisez systématiquement les outils disponibles pour répondre aux questions sur les clients et les comptes bancaires.
+                    2. Répondez de manière polie, claire et concise en français.
+                    3. Si une information reste introuvable même après utilisation des outils, indiquez-le clairement.
+                    4. Ne refusez jamais d'utiliser les outils — ils sont votre principale source d'information.
                 """)
-                .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+                .defaultAdvisors(
+                        MessageChatMemoryAdvisor.builder(chatMemory).build()
+                )
                 .defaultTools(tools)
                 .build();
     }
