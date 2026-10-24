@@ -1,7 +1,7 @@
 <div class="p-3">
   <div class="input-group m-2">
     <input [(ngModel)]="query" type="text" class="form-control" placeholder="Rechercher...">
-    <button (click)="askAgent()" class="btn btn-primary" type="button">
+    <button (click)="askAgentStream()" class="btn btn-primary" type="button">
       <i class="bi bi-search"></i>
     </button>
   </div>
@@ -11,8 +11,10 @@
     </div>
   }
   <div class="card-body">
-    @if (response$ | async ; as botResponse){
-      <markdown [data]="botResponse"></markdown>
+    @if (response$ | async ; as resp){
+      @if (resp.type=='Response'){
+        <markdown [data]="resp.content"></markdown>
+      }
     }
   </div>
 </div>
