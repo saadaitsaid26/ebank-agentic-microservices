@@ -1,4 +1,9 @@
-<div class="p">
+<div class="p-3">
+  @if (loadService.isLoading()){
+    <div class="spinner-border" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+  }
   @if (accounts$|async; as state){
     @if (state.status==RequestStatus.ERROR){
       <div class="text-danger">

@@ -1,8 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {AsyncPipe} from '@angular/common';
-import {Account, AccountListState, RequestStatus} from '../../model/account.model';
+import {Account, AccountListState, RequestStatus} from '../model/account.model';
 import {catchError, map, Observable, of} from 'rxjs';
+import {LoadingService} from '../services/loading';
 
 @Component({
   imports: [
@@ -14,6 +15,7 @@ import {catchError, map, Observable, of} from 'rxjs';
 })
 export class Accounts {
   private http  = inject(HttpClient);
+  public loadService = inject(LoadingService);
   accounts$: Observable<AccountListState> = this.http.get<Account[]>
     ("http://localhost:9999/EBANK-SERVICE/accounts")
     .pipe(
