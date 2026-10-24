@@ -62,3 +62,14 @@ Le Bot Telegram
 
 La liste des clients : 
 
+
+Test de chatbot :
+
+
+
+
+Test de l'historique de conversation
+
+
+Creation d'un nouveau compte
+
