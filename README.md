@@ -11,6 +11,8 @@
 [![Resilience4j](https://img.shields.io/badge/Resilience-Circuit_Breaker-E41E26?style=flat-square)](https://resilience4j.readme.io/)
 [![OpenAPI](https://img.shields.io/badge/Docs-Swagger_UI-85EA2D?style=flat-square&logo=swagger&logoColor=black)](https://springdoc.org/)
 [![H2](https://img.shields.io/badge/Database-H2_In--Memory-003DAD?style=flat-square)](https://h2database.com/)
+[![Angular](https://img.shields.io/badge/Angular-21-0F0F0F?style=flat-square&logo=angular&logoColor=red)](https://angular.dev/)
+[![Spring AI](https://img.shields.io/badge/Spring_AI-Agent_MCP-0066CC?style=flat-square)](https://docs.spring.io/spring-ai/reference/)
 
 </div>
 
@@ -24,8 +26,10 @@ Le projet met en œuvre les fondations essentielles d'un système distribué :
 
 - ✅ **Isolation des responsabilités** — un microservice métier par domaine (clients, comptes bancaires)
 - ✅ **Service Registry** — enregistrement et découverte dynamique des services avec **Netflix Eureka**
-- ✅ **API Gateway** — point d'entrée unique avec routage statique et dynamique via **Spring Cloud Gateway (WebFlux)** 
+- ✅ **API Gateway** — point d'entrée unique avec routage statique et dynamique via **Spring Cloud Gateway (WebFlux)**
 - ✅ **Communication interservices** — appels REST déclaratifs via **OpenFeign**
+- ✅ **Agent IA** — assistant bancaire alimenté par un **LLM (Groq/Qwen)** connecté aux services via le protocole **MCP (Model Context Protocol)**, disponible sur le web, **Discord** et **Telegram**
+- ✅ **Frontend Angular** — interface web moderne : liste des comptes et chatbot streaming
 - ✅ **Résilience** — pattern **Circuit Breaker (Resilience4j)** avec fallback pour absorber les pannes de service
 - ✅ **Documentation API** — **Swagger UI (springdoc-openapi)** pour explorer et tester chaque endpoint
 - ✅ **Observabilité** — exposé des métriques et du monitoring via **Spring Boot Actuator**
@@ -35,14 +39,22 @@ Le projet met en œuvre les fondations essentielles d'un système distribué :
 ```mermaid
 flowchart LR
     Client(["👤 Client HTTP"]) --> GW
+    UI["🖥️ angular-front :4200"] --> GW
     GW["🌐 gateway-service :9999"]
     GW -->|lb://customer-service| CS["customer-service :8056"]
     GW -->|lb://ebank-service| ES["ebank-service :8057"]
+    GW -->|"lb://EBANK-BOT"| BOT["🤖 ebank-bot :8058"]
     ES -->|"OpenFeign + CircuitBreaker"| CS
+    BOT <-.->|"MCP streamable /mcp"| CS
+    BOT <-.->|"MCP streamable /mcp"| ES
+    LLM["☁️ Groq · qwen 3.8 27b env GROQ_API_KEY"] --- BOT
+    DIST["💬 Discord"] --- BOT
+    TG["✈️ Telegram"] --- BOT
     EUREKA[("discovery-service (Eureka) :8761")]
     CS -.-|"fetch/registry"| EUREKA
     ES -.- EUREKA
     GW -.- EUREKA
+    BOT -.- EUREKA
     CS --> DB1[("H2 · customer-db")]
     ES --> DB2[("H2 · accounts-db")]
 ```
@@ -59,6 +71,8 @@ flowchart LR
 | 2 | 🏦 `ebank-service` | Gestion des comptes bancaires, enrichissement des comptes avec les données client | `8057` | [`ebank-service/`](ebank-service) |
 | 3 | 🧭 `discovery-service` | Registre de services **Netflix Eureka** — tous les services s'y enregistrent | `8761` | [`discovery-service/`](discovery-service) |
 | 4 | 🌐 `gateway-service` | **API Gateway** — routage statique & dynamique des requêtes entrantes | `9999` | [`gateway-service/`](gateway-service) |
+| 5 | 🤖 `ebank-bot` | **Agent IA** — ChatClient LLM + outils MCP des services, bots Discord & Telegram, streaming | `8058` | [`ebank-bot/`](ebank-bot) |
+| 6 | 🖥️ `angular-front` | **Interface web** — liste des comptes + chatbot (UI streaming) | `4200` | [`angular-front/`](angular-front) |
 
 ## 🛠️ Stack technique
 
@@ -110,6 +124,15 @@ cd ebank-service
 # 4. API Gateway (nouveau terminal)
 cd gateway-service
 ./mvnw spring-boot:run
+
+# 5. (Optionnel) Agent IA — définir d'abord GROQ_API_KEY (+ DISCORD_TOKEN / TELEGRAM_TOKEN si bots)
+cd ebank-bot
+./mvnw spring-boot:run              # PowerShell : $env:GROQ_API_KEY="gsk_..."
+
+# 6. (Optionnel) Interface web Angular — dans un autre terminal
+cd angular-front
+npm install
+npm start                           # -> http://localhost:4200
 ```
 
 ### 3️⃣ Vérifier le déploiement
@@ -227,23 +250,36 @@ ebank-agentic-microservices/
 │       └── services/       # Logique métier
 ├── gateway-service/        # API Gateway — routage dynamique
 │   └── src/main/java/net/saad/gatewayservice/
+├── ebank-bot/              # Agent IA — Spring AI, MCP, bots Discord & Telegram
+│   └── src/main/java/net/saad/ebankbot/
+├── angular-front/          # Frontend Angular 21 — comptes + chatbot
 ├── src/                    # Application racine Spring Boot (EBank-ms-app)
 ├── mvnw / mvnw.cmd         # Maven Wrapper — aucune installation de Maven requise
 └── pom.xml                 # Descripteur Maven du projet racine
 ```
 
-## 🛰️ Branches en cours
+## 🤖 Couche agentique — ebank-bot
 
-Le dépôt se poursuit avec la couche **agentique (IA)** annoncée par son nom :
+`ebank-bot` (port `8058`) est le cerveau conversationnel de la plateforme :
 
-| Branche | Contenu |
+| Composant | Détail |
 |---|---|
-| `feature/EbankChatbot` | **Serveur MCP** & client MCP, LLMs (Mistral, Groq), mémoire du chatbot, bots **Discord & Telegram**, streaming des réponses, Swagger/MCP |
-| `feature/Frontend` | **Frontend Angular**, intégration serveur/client avec `ebank-service`, UI du bot, loader d'attente, liste des comptes |
+| 🧠 **Modèle LLM** | Spring AI (API compatible OpenAI) → backend **Groq** (`GROQ_API_KEY`), modèle `qwen/qwen3.8-27b` |
+| 🔧 **Outils MCP** | Client MCP *streamable* vers `/mcp` de `customer-service` et `ebank-service` — l'agent interroge les **données bancaires en temps réel** |
+| 💾 **Mémoire de conversation** | `MessageChatMemoryAdvisor` — chaque conversation garde son historique (`conversationId`) |
+| 🌊 **Réponses** | synchrone (`/chat`) et **streaming** (`/chatStream`) |
+| 💬 **Canaux** | bots **Discord** (`DISCORD_TOKEN`) & **Telegram** (`TELEGRAM_TOKEN`) |
+| 🖥️ **API web** | `GET /chat?query=...`, `GET /chatStream?...` — consommées par le frontend via la Gateway |
 
-```bash
-git checkout feature/EbankChatbot     # ou feature/Frontend
-```
+> 🔑 Variables d'environnement requises : `GROQ_API_KEY`, et si vous activez les bots : `DISCORD_TOKEN`, `TELEGRAM_TOKEN`.
+
+## 🖥️ Frontend — angular-front
+
+Interface **Angular 21** (standalone, port `4200` par défaut) :
+
+- 📋 `accounts` — liste des comptes bancaires récupérés **via la Gateway**
+- 🗨️ `bot-ui` — chatbot conversationnel (réponses en streaming, loader d'attente)
+- ⏳ `interceptors` — loader global pendant les requêtes HTTP
 
 ## 👤 Auteur
 
